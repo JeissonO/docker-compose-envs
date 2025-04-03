@@ -1,0 +1,18 @@
+version: '3.9'
+
+services:
+  custom-env:
+    image: custom-env
+    user: ${USER}
+    build:
+      args: 
+        user: ${USER}
+        rootpassword: ${DC_ROOTPASSWORD}
+      dockerfile: Dockerfile202504
+      context: ./customizations
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - ${HOME}/${DC_FOLDER}:/home/${USER}
+    - ${HOME}/.zshrc:/home/${USER}/.zshrc
+    - ${HOME}/.oh-my-zsh:/home/${USER}/.oh-my-zsh
+    hostname: custom-env

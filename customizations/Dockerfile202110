@@ -1,0 +1,76 @@
+FROM ubuntu:focal
+
+ARG user
+ARG rootpassword
+
+ENV TZ=America/Bogota
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+RUN apt update && \
+  apt install -y zsh \ 
+  build-essential \
+  curl \
+  nodejs \
+  npm \
+  git-core \
+  gnupg \
+  sudo \
+  wget \
+  nano \
+  unzip \
+  software-properties-common  \
+  fonts-powerline && \
+  adduser --quiet --disabled-password --shell /bin/zsh --home /home/$user --gecos "User" $user && \
+  echo "$user:$rootpassword" | chpasswd && usermod -aG sudo $user
+
+RUN apt install -y locales tzdata && \
+    echo "America/Bogota" > /etc/timezone && \
+    dpkg-reconfigure -f noninteractive tzdata && \
+    sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    echo 'LANG="en_US.UTF-8"'>/etc/default/locale && \
+    dpkg-reconfigure --frontend=noninteractive locales && \
+    update-locale LANG=en_US.UTF-8
+
+RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh || true && \
+  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+  unzip awscliv2.zip && \
+  ./aws/install && \
+  curl -sSL https://get.docker.com/ | bash && \
+  curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
+  install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
+  curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp && \
+  mv /tmp/eksctl /usr/local/bin && \
+  curl -fLSs https://raw.githubusercontent.com/CircleCI-Public/circleci-cli/master/install.sh | bash && \
+  curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg && \
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
+  curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash && \
+  wget -O helmfile_linux_amd64 https://github.com/roboll/helmfile/releases/download/v0.140.1/helmfile_linux_amd64 && \
+  chmod +x helmfile_linux_amd64 && \
+  mv helmfile_linux_amd64 /usr/bin/helmfile && \
+  curl -sS https://webinstall.dev/k9s | bash && \
+  export PATH="/home/$user/.local/bin:$PATH" && \
+  wget -O kubectx https://github.com/ahmetb/kubectx/releases/download/v0.9.4/kubectx && \
+  wget -O kubens https://github.com/ahmetb/kubectx/releases/download/v0.9.4/kubens && \
+  chmod +x kubens && chmod +x kubectx && \
+  mv kubectx kubens /usr/local/bin/ && \   
+  curl --silent --location "https://github.com/FairwindsOps/pluto/releases/download/v5.0.1/pluto_5.0.1_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp && \
+  mv /tmp/pluto /usr/local/bin && \  
+  rm -rf sops.deb awscliv2.zip aws kubectl && \
+  rm -rf /var/lib/apt/lists/* && \
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && \
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" && \
+  brew doctor && \
+  brew install gcc && \
+  brew install fluxcd/tap/flux && \
+  brew install fluxctl && \
+  brew install kops && \
+  brew install pre-commit && \
+  brew install norwoodj/tap/helm-docs && \
+  npm install -g typescript && \
+  npm install -g aws-cdk 
+
+ENV LC_ALL en_US.UTF-8 
+ENV LANG en_US.UTF-8  
+ENV LANGUAGE en_US:en 
+
+CMD ["sleep", "infinity"]

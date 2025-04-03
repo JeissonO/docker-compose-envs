@@ -1,0 +1,84 @@
+FROM ubuntu:latest
+
+ARG user
+ARG rootpassword
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=America/Bogota
+
+# Update and install dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    git \
+    unzip \
+    build-essential \
+    software-properties-common \
+    locales \
+    tzdata \
+    sudo \
+    nano \
+    procps \
+    file \
+    libz-dev \
+    libbz2-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libreadline-dev \
+    libsqlite3-dev \
+    libncurses5-dev \
+    libncursesw5-dev \
+    xz-utils \
+    tk-dev \
+    libffi-dev \
+    liblzma-dev \
+    gcc \
+    g++ \
+    make \
+    zsh && \ 
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Set up timezone and locale
+RUN echo "$TZ" > /etc/timezone && \
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+    dpkg-reconfigure -f noninteractive tzdata && \
+    locale-gen en_US.UTF-8 && \
+    update-locale LANG=en_US.UTF-8
+
+ENV LC_ALL=en_US.UTF-8
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+
+# Create user '$user' with sudo privileges
+RUN useradd -ms /bin/zsh $user && \ 
+    echo "$user:$rootpassword" | chpasswd && \
+    echo "$user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Install Node.js and npm
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs
+
+# Switch to user '$user'
+USER $user
+WORKDIR /home/$user
+
+# Configure npm to use a directory in the user's home for global installations
+RUN mkdir -p /home/$user/.npm-global && \
+    npm config set prefix '/home/$user/.npm-global' && \
+    echo 'export PATH=/home/$user/.npm-global/bin:$PATH' >> /home/$user/.zshrc && \
+    export PATH=/home/$user/.npm-global/bin:$PATH
+
+# Install AWS CLI v2
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    sudo ./aws/install && \
+    rm -rf awscliv2.zip aws
+
+# Verify installations
+RUN node --version && \
+    git --version && \
+    zsh --version  # Verify zsh installation
+
+# Default command
+CMD sleep infinity
