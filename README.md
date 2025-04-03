@@ -101,7 +101,7 @@ Replace <service_name> with the name of the service you started.
 ```sh
     docker exec -it $(docker ps -q --filter name=custom-env) /bin/zsh
 ```
-Check the **service_log.txt** file for logged details
+4. Check the **service_log.txt** file for logged details
 ```sh
     cat service_log.txt
 ```
