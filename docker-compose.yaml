@@ -1,8 +1,6 @@
-version: '3.9'
-
 services:
-  custom-env:
-    image: custom-env
+  sandbox:
+    image: sandbox
     user: ${USER}
     build:
       args: 
@@ -13,6 +11,7 @@ services:
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
     - ${HOME}/${DC_FOLDER}:/home/${USER}
-    - ${HOME}/.zshrc:/home/${USER}/.zshrc
-    - ${HOME}/.oh-my-zsh:/home/${USER}/.oh-my-zsh
-    hostname: custom-env
+    #- ${HOME}/.zshrc:/home/${USER}/.zshrc
+    #- ${HOME}/.ssh:/home/${USER}/.ssh
+    #- ${HOME}/.oh-my-zsh:/home/${USER}/.oh-my-zsh
+    hostname: sandbox

@@ -47,4 +47,4 @@ echo "To access the Docker container after the service is up, use the following 
 echo "docker exec -it \$(docker ps -q --filter name=$DC_SERVICENAME) /bin/zsh"
 
 # Run docker-compose for the specified service
-docker-compose up "$DC_SERVICENAME"
+docker compose up "$DC_SERVICENAME"

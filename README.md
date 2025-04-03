@@ -32,7 +32,7 @@ The default command for the container is `sleep infinity`, allowing you to inter
 
 ## Docker Compose Configuration
 
-The `docker-compose.yaml` file defines a service named `custom-env`. Key configurations include:
+The `docker-compose.yaml` file defines a service named `sandbox`. Key configurations include:
 - **Build Arguments**:
   - `user`: The username for the container.
   - `rootpassword`: The root password for the user.
@@ -95,11 +95,11 @@ Replace <service_name> with the name of the service you started.
 ```sh
     Enter the root password (DC_ROOTPASSWORD): mypassword
     Enter the folder name (DC_FOLDER): myfolder
-    Enter the service name to start (DC_SERVICENAME): custom-env
+    Enter the service name to start (DC_SERVICENAME): sandbox
 ```
 3. Access the container in a new terminal:
 ```sh
-    docker exec -it $(docker ps -q --filter name=custom-env) /bin/zsh
+    docker exec -it $(docker ps -q --filter name=sandbox) /bin/zsh
 ```
 4. Check the **service_log.txt** file for logged details
 ```sh
